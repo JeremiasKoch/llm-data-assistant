@@ -1,0 +1,14 @@
+# Ignorar entorno virtual de Python
+.venv
+venv
+
+# Ignorar caché de Python y otros archivos generados
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Ignorar carpetas de control de versiones y de IDE
+.git
+.vscode
+.idea

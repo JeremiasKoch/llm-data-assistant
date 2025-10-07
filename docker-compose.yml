@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  # 1. SERVICIO DE LA BASE DE DATOS POSTGRESQL
+  db:
+    image: postgres:15-alpine
+    container_name: postgres_db_agent
+    environment:
+      # Credenciales para crear la DB y el Usuario (tomadas del .env)
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASS}
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB']
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # 2. SERVICIO DE LA APLICACIÓN STREAMLIT
+  app:
+    build: .
+    container_name: streamlit_data_agent
+    ports:
+      - '8501:8501'
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASS: ${DB_PASS}
+      GOOGLE_API_KEY: ${GOOGLE_API_KEY}
+      LANGFUSE_PUBLIC_KEY: ${LANGFUSE_PUBLIC_KEY}
+      LANGFUSE_SECRET_KEY: ${LANGFUSE_SECRET_KEY}
+      LANGFUSE_HOST: ${LANGFUSE_HOST}
+
+volumes:
+  postgres_data:
